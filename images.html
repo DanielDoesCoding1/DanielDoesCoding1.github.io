@@ -1,21 +1,176 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Galary</title>
-</head>
-<body>
-    <img id= "a line" src="assets/IMG_5879.JPG"> 
-    <img id= "a line" src="assets/IMG_5883.JPG" >
-    <img id= "a line" src="assets/IMG_5885.JPG">
-    <img id= "a line" src="assets/IMG_5895.JPG">
-    <img id= "a line" src="assets/IMG_5902.JPG">
-    <img id= "a line" src="assets/IMG_5905.JPG">
-    <img id= "a line" src="assets/IMG_5917.JPG">
-    <img id= "a line" src="assets/IMG_6392.JPG">
-    <img id= "a line" src="assets/IMG_6393.JPG">
-    <img id= "a line" src="assets/IMG_6394.JPG">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Gallery</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- All content goes here -->
+    <div id="all-contents">
+      <nav>
+        <h1>Image Gallery</h1>
+        <ul id="nav-ul">
+          <li class="nav-li">
+            <a href="index.html">Home</a>
+          </li>
+          <li class="nav-li">
+            <a href="portfolo.html">Portfolio</a>
+          </li>
+          <li class="nav-li">
+            <a href="images.html">Images</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
 
-</body>
+    <main>
+      <div class="gallery">
+        <img class="gallery-img" src="assets/IMG_5879.JPG" alt="Image 1" />
+        <img class="gallery-img" src="assets/IMG_5883.JPG" alt="Image 2" />
+        <img class="gallery-img" src="assets/IMG_5885.JPG" alt="Image 3" />
+        <img class="gallery-img" src="assets/IMG_5895.JPG" alt="Image 4" />
+        <img class="gallery-img" src="assets/IMG_5902.JPG" alt="Image 5" />
+        <img class="gallery-img" src="assets/IMG_5905.JPG" alt="Image 6" />
+        <img class="gallery-img" src="assets/IMG_5917.JPG" alt="Image 7" />
+        <img class="gallery-img" src="assets/IMG_6392.JPG" alt="Image 8" />
+        <img class="gallery-img" src="assets/IMG_6393.JPG" alt="Image 9" />
+        <img class="gallery-img" src="assets/IMG_6394.JPG" alt="Image 10" />
+      </div>
+    </main>
+
+    <!-- Lightbox/Modal -->
+    <div id="lightbox" class="lightbox">
+      <span class="close">&times;</span>
+      <div class="lightbox-container">
+        <img class="lightbox-img" src="" alt="" />
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in">+</button>
+        <span class="zoom-level" id="zoom-level">100%</span>
+        <button class="zoom-btn" id="zoom-out">−</button>
+      </div>
+    </div>
+
+    <script>
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.querySelector(".lightbox-img");
+      const lightboxContainer = document.querySelector(".lightbox-container");
+      const closeBtn = document.querySelector(".close");
+      const galleryImgs = document.querySelectorAll(".gallery-img");
+      const zoomInBtn = document.getElementById("zoom-in");
+      const zoomOutBtn = document.getElementById("zoom-out");
+      const zoomLevelDisplay = document.getElementById("zoom-level");
+
+      let currentZoom = 1;
+      const minZoom = 1;
+      const maxZoom = 5;
+      const zoomStep = 0.2;
+
+      function resetZoom() {
+        currentZoom = 1;
+        updateZoom();
+      }
+
+      function updateZoom() {
+        lightboxImg.style.transform = `translate(-50%, -50%) scale(${currentZoom})`;
+        zoomLevelDisplay.textContent = Math.round(currentZoom * 100) + "%";
+      }
+
+      function zoomIn() {
+        if (currentZoom < maxZoom) {
+          currentZoom = Math.min(currentZoom + zoomStep, maxZoom);
+          updateZoom();
+        }
+      }
+
+      function zoomOut() {
+        if (currentZoom > minZoom) {
+          currentZoom = Math.max(currentZoom - zoomStep, minZoom);
+          updateZoom();
+        }
+      }
+
+      // Open lightbox when image is clicked
+      galleryImgs.forEach((img) => {
+        img.addEventListener("click", function () {
+          lightbox.style.display = "block";
+          lightboxImg.src = this.src;
+          lightboxImg.alt = this.alt;
+          resetZoom();
+          document.body.style.overflow = "hidden"; // Prevent scrolling
+        });
+      });
+
+      // Zoom controls
+      zoomInBtn.addEventListener("click", zoomIn);
+      zoomOutBtn.addEventListener("click", zoomOut);
+
+      // Scroll wheel zoom
+      lightboxContainer.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          zoomIn();
+        } else {
+          zoomOut();
+        }
+      });
+
+      // Keyboard zoom controls
+      document.addEventListener("keydown", function (e) {
+        if (lightbox.style.display === "block") {
+          if (e.key === "+" || e.key === "=") {
+            zoomIn();
+          } else if (e.key === "-") {
+            zoomOut();
+          } else if (e.key === "Escape") {
+            lightbox.style.display = "none";
+            document.body.style.overflow = "auto";
+          }
+        }
+      });
+
+      // Close lightbox when X is clicked
+      closeBtn.addEventListener("click", function () {
+        lightbox.style.display = "none";
+        document.body.style.overflow = "auto"; // Allow scrolling again
+      });
+
+      // Close lightbox when clicking outside the image
+      lightbox.addEventListener("click", function (e) {
+        if (e.target === lightbox || e.target === lightboxContainer) {
+          lightbox.style.display = "none";
+          document.body.style.overflow = "auto";
+        }
+      });
+
+      // Touch pinch zoom
+      let lastDistance = 0;
+      lightboxContainer.addEventListener("touchmove", function (e) {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const touch1 = e.touches[0];
+          const touch2 = e.touches[1];
+          const distance = Math.hypot(
+            touch1.clientX - touch2.clientX,
+            touch1.clientY - touch2.clientY,
+          );
+
+          if (lastDistance > 0) {
+            if (distance > lastDistance) {
+              zoomIn();
+            } else if (distance < lastDistance) {
+              zoomOut();
+            }
+          }
+          lastDistance = distance;
+        }
+      });
+
+      lightboxContainer.addEventListener("touchend", function () {
+        lastDistance = 0;
+      });
+    </script>
+  </body>
 </html>
